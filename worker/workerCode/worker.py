@@ -1,9 +1,7 @@
 import pika
-import json
-import cv2  # Assuming you're using OpenCV for image processing
 import base64
 import controller
-
+import requests
 
 # RabbitMQ connection details (replace with your own)
 connection_parameters = pika.ConnectionParameters(host='35.205.252.20')
@@ -55,6 +53,12 @@ def on_message_received(channel, method, properties, body):
     elif process == 'harris':
       controller.service_apply_harris_corner_detection(filename, int(request[2]), int(request[3]), float(request[4]), id)
 
+    # Send processed image
+    with open(f'static/images/{id}.jpg', 'rb') as f:
+      files = {'file': f}
+      response = requests.post(f'http://34.135.56.19:80/{id}/processed', files=files)
+    print(response.status_code)
+    
     # Acknowledge task completion
     channel.basic_ack(delivery_tag=method.delivery_tag)
     print(f"Finished processing image with type: {process}")
