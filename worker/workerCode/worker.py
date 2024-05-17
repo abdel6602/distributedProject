@@ -9,11 +9,6 @@ import controller
 connection_parameters = pika.ConnectionParameters(host='35.205.252.20')
 
 
-def save_image(filename):
-    with open(filename, 'rb') as f:
-        image_data = f.read()
-    return image_data
-
 def on_message_received(channel, method, properties, body):
   try:
     # Parse task message
@@ -29,7 +24,7 @@ def on_message_received(channel, method, properties, body):
     image_data = base64.b64decode(request[0])
     process = request[1]
     print(f"Processing image with type: {process}")
-    filename ='static/images/recieved_image.jpg'
+    filename ='../static/images/recieved_image.jpg'
     with open (filename, 'wb') as f:
         f.write(image_data)
     
