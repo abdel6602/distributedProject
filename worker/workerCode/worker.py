@@ -1,7 +1,7 @@
 import pika
 import base64
 import controller
-import pymongo
+import save
 
 # RabbitMQ connection details (replace with your own)
 connection_parameters = pika.ConnectionParameters(host='104.199.5.58')
@@ -58,7 +58,8 @@ def on_message_received(channel, method, properties, body):
     with open(f'{id}.jpg', 'rb') as f:
       image_data = f.read()
     #save image in database
-    pymongo.MongoClient('mongodb://34.155.67.189:27017/')["focusSnap"]['processed_images'].insert_one({'id': id, 'image': image_data})
+    # pymongo.MongoClient('mongodb://34.155.67.189:27017/')["focusSnap"]['processed_images'].insert_one({'id': id, 'image': image_data})
+    save.upload_image_to_gcs("focusSnap", f'{id}.jpg')
     
     # Acknowledge task completion
     channel.basic_ack(delivery_tag=method.delivery_tag)
