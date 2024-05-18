@@ -1,10 +1,10 @@
 import pika
 import base64
 import controller
-import requests
+import pymongo
 
 # RabbitMQ connection details (replace with your own)
-connection_parameters = pika.ConnectionParameters(host='35.205.252.20')
+connection_parameters = pika.ConnectionParameters(host='104.199.5.58')
 
 
 def on_message_received(channel, method, properties, body):
@@ -22,10 +22,12 @@ def on_message_received(channel, method, properties, body):
     image_data = base64.b64decode(request[0])
     process = request[1]
     print(f"Processing image with type: {process}")
-    filename ='../static/images/recieved_image.jpg'
-    with open (filename, 'wb') as f:
-        f.write(image_data)
+    filename = 'recieved.jpg'
+    with open(filename, 'wb') as f:
+      f.write(image_data)
+
     
+    print(filename)
     if process == 'blur':
       controller.service_blur(filename, int(request[2]), id)
     elif process == 'grayscale':
@@ -53,11 +55,10 @@ def on_message_received(channel, method, properties, body):
     elif process == 'harris':
       controller.service_apply_harris_corner_detection(filename, int(request[2]), int(request[3]), float(request[4]), id)
 
-    # Send processed image
-    with open(f'static/images/{id}.jpg', 'rb') as f:
-      files = {'file': f}
-      response = requests.post(f'http://34.135.56.19:80/{id}/processed', files=files)
-    print(response.status_code)
+    with open(f'{id}.jpg', 'rb') as f:
+      image_data = f.read()
+    #save image in database
+    pymongo.MongoClient('mongodb://34.155.67.189:27017/')["focusSnap"]['processed_images'].insert_one({'id': id, 'image': image_data})
     
     # Acknowledge task completion
     channel.basic_ack(delivery_tag=method.delivery_tag)

@@ -5,7 +5,7 @@ import base64
 
 
 def main(filename, operation, params, id):
-  connection_parameters = pika.ConnectionParameters(host='35.205.252.20')
+  connection_parameters = pika.ConnectionParameters(host='104.199.5.58')
   connection = pika.BlockingConnection(connection_parameters)
   channel = connection.channel()
 
